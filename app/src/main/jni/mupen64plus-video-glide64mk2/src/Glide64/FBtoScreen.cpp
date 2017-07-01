@@ -351,9 +351,11 @@ bool DrawFrameBufferToScreen(FB_TO_SCREEN_INFO & fb_info)
     wxUint32 idx;
     const wxUint32 bound = (BMASK+1-fb_info.addr) >> 1;
     bool empty = true;
-    for (wxUint32 y=0; y < height; y++)
+    int dstBoundCheck = 0;
+
+    for (wxUint32 y=0; y < height && dstBoundCheck < TEX_SIZE; y++)
     {
-      for (wxUint32 x=0; x < width; x++)
+      for (wxUint32 x=0; x < width && dstBoundCheck < TEX_SIZE; x++)
       {
         idx = (x+y*fb_info.width)^1;
         if (idx >= bound)
@@ -361,8 +363,10 @@ bool DrawFrameBufferToScreen(FB_TO_SCREEN_INFO & fb_info)
         c = src[idx];
         if (c) empty = false;
         *(dst++) = (c >> 1) | ((c&1)<<15);
+        dstBoundCheck++;
       }
       dst += texwidth-width;
+      dstBoundCheck += texwidth-width;
     }
     if (empty)
       return false;
@@ -378,17 +382,21 @@ bool DrawFrameBufferToScreen(FB_TO_SCREEN_INFO & fb_info)
     wxUint32 col;
     wxUint32 idx;
     const wxUint32 bound = (BMASK+1-fb_info.addr) >> 2;
-    for (wxUint32 y=0; y < height; y++)
+    int dstBoundCheck = 0;
+
+    for (wxUint32 y=0; y < height && dstBoundCheck < TEX_SIZE; y++)
     {
-      for (wxUint32 x=0; x < width; x++)
+      for (wxUint32 x=0; x < width && dstBoundCheck < TEX_SIZE; x++)
       {
         idx = x+y*fb_info.width;
         if (idx >= bound)
           break;
         col = src[idx];
         *(dst++) = (col >> 8) | 0xFF000000;
+        dstBoundCheck++;
       }
       dst += texwidth-width;
+      dstBoundCheck += texwidth-width;
     }
     t_info.format = GR_TEXFMT_ARGB_8888;
     t_info.data = tex;
