@@ -537,7 +537,7 @@ public class GlobalPrefs
         // Audio prefs
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         audioSwapChannels = mPreferences.getBoolean( "audioSwapChannels", false );
-        enableSLESAudioTimeSretching = mPreferences.getBoolean( "audioSLESTimeStretch", true );
+        enableSLESAudioTimeSretching = mPreferences.getBoolean( "audioSLESTimeStretch2", false );
         audioSLESSecondaryBufferNbr = getSafeInt( mPreferences, "audioSLESBufferNbr2", 10 );
         audioSLESFloatingPoint = mPreferences.getBoolean( "audioSLESFloatingPoint", false );
 

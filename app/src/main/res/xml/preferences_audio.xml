@@ -55,8 +55,8 @@
         android:summary="@string/selectedValue"
         android:title="@string/audioPlugin_title" />
     <android.support.v7.preference.CheckBoxPreference
-        android:defaultValue="true"
-        android:key="audioSLESTimeStretch"
+        android:defaultValue="false"
+        android:key="audioSLESTimeStretch2"
         android:summary="@string/audioSLESTimeStretch_summary"
         android:title="@string/audioSLESTimeStretch_title" />
 
