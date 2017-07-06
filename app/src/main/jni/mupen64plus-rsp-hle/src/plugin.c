@@ -23,6 +23,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "common.h"
 #include "hle.h"
@@ -40,6 +41,7 @@
 static struct hle_t g_hle;
 static void (*l_CheckInterrupts)(void) = NULL;
 static void (*l_ProcessDlistList)(void) = NULL;
+static int (*l_ProcessDlistList2)(void) = NULL;
 static void (*l_ProcessAlistList)(void) = NULL;
 static void (*l_ProcessRdpList)(void) = NULL;
 static void (*l_ShowCFB)(void) = NULL;
@@ -93,12 +95,25 @@ void HleCheckInterrupts(void* UNUSED(user_defined))
     (*l_CheckInterrupts)();
 }
 
-void HleProcessDlistList(void* UNUSED(user_defined))
+bool HleProcessDlistList(void* UNUSED(user_defined))
 {
-    if (l_ProcessDlistList == NULL)
-        return;
+    int returnValue = 1;
+    if (l_ProcessDlistList2 != NULL)
+    {
+        returnValue = (*l_ProcessDlistList2)();
 
-    (*l_ProcessDlistList)();
+		if(returnValue == 1)
+		{
+			HleErrorMessage(0, "RETURN VALUE2=%d", returnValue);
+		}
+    }
+
+    else if (l_ProcessDlistList != NULL)
+    {
+        (*l_ProcessDlistList)();
+    }
+
+    return returnValue != 0;
 }
 
 void HleProcessAlistList(void* UNUSED(user_defined))
@@ -211,6 +226,7 @@ EXPORT void CALL InitiateRSP(RSP_INFO Rsp_Info, unsigned int* UNUSED(CycleCount)
 
     l_CheckInterrupts = Rsp_Info.CheckInterrupts;
     l_ProcessDlistList = Rsp_Info.ProcessDlistList;
+    l_ProcessDlistList2 = Rsp_Info.ProcessDlistList2;
     l_ProcessAlistList = Rsp_Info.ProcessAlistList;
     l_ProcessRdpList = Rsp_Info.ProcessRdpList;
     l_ShowCFB = Rsp_Info.ShowCFB;

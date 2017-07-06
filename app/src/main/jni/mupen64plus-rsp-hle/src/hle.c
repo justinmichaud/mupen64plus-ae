@@ -51,11 +51,11 @@
 /* helper functions prototypes */
 static unsigned int sum_bytes(const unsigned char *bytes, unsigned int size);
 static bool is_task(struct hle_t* hle);
-static void rsp_break(struct hle_t* hle, unsigned int setbits);
-static void forward_gfx_task(struct hle_t* hle);
+static void rsp_break(struct hle_t* hle, unsigned int setbits, bool complete);
+static bool forward_gfx_task(struct hle_t* hle);
 static bool try_fast_audio_dispatching(struct hle_t* hle);
-static bool try_fast_task_dispatching(struct hle_t* hle);
-static void normal_task_dispatching(struct hle_t* hle);
+static bool try_fast_task_dispatching(struct hle_t* hle, bool* complete);
+static void normal_task_dispatching(struct hle_t* hle, bool* complete);
 static void non_task_dispatching(struct hle_t* hle);
 
 #ifdef ENABLE_TASK_DUMP
@@ -120,13 +120,14 @@ void hle_init(struct hle_t* hle,
 
 void hle_execute(struct hle_t* hle)
 {
+    bool complete = false;
     if (is_task(hle)) {
-        if (!try_fast_task_dispatching(hle))
-            normal_task_dispatching(hle);
-        rsp_break(hle, SP_STATUS_TASKDONE);
+        if (!try_fast_task_dispatching(hle, &complete))
+            normal_task_dispatching(hle, &complete);
+        rsp_break(hle, SP_STATUS_TASKDONE, complete);
     } else {
         non_task_dispatching(hle);
-        rsp_break(hle, 0);
+        rsp_break(hle, 0, true);
     }
 }
 
@@ -157,9 +158,16 @@ static bool is_task(struct hle_t* hle)
     return (*dmem_u32(hle, TASK_UCODE_BOOT_SIZE) <= 0x1000);
 }
 
-static void rsp_break(struct hle_t* hle, unsigned int setbits)
+static void rsp_break(struct hle_t* hle, unsigned int setbits, bool complete)
 {
-    *hle->sp_status |= setbits | SP_STATUS_BROKE | SP_STATUS_HALT;
+    if(complete)
+    {
+        *hle->sp_status |= setbits | SP_STATUS_BROKE | SP_STATUS_HALT;
+    }
+    else
+    {
+        *hle->sp_status &= ~(setbits | SP_STATUS_BROKE | SP_STATUS_HALT);
+    }
 
     if ((*hle->sp_status & SP_STATUS_INTR_ON_BREAK)) {
         *hle->mi_intr |= MI_INTR_SP;
@@ -167,9 +175,9 @@ static void rsp_break(struct hle_t* hle, unsigned int setbits)
     }
 }
 
-static void forward_gfx_task(struct hle_t* hle)
+static bool forward_gfx_task(struct hle_t* hle)
 {
-    HleProcessDlistList(hle->user_defined);
+    return HleProcessDlistList(hle->user_defined);
 }
 
 static bool try_fast_audio_dispatching(struct hle_t* hle)
@@ -253,8 +261,10 @@ static bool try_fast_audio_dispatching(struct hle_t* hle)
     return false;
 }
 
-static bool try_fast_task_dispatching(struct hle_t* hle)
+static bool try_fast_task_dispatching(struct hle_t* hle, bool* complete)
 {
+    *complete = true;
+
     /* identify task ucode by its type */
     switch (*dmem_u32(hle, TASK_TYPE)) {
     case 1:
@@ -263,7 +273,7 @@ static bool try_fast_task_dispatching(struct hle_t* hle)
             return false;
 
         if (FORWARD_GFX) {
-            forward_gfx_task(hle);
+            *complete = forward_gfx_task(hle);
             return true;
         }
         break;
@@ -284,8 +294,9 @@ static bool try_fast_task_dispatching(struct hle_t* hle)
     return false;
 }
 
-static void normal_task_dispatching(struct hle_t* hle)
+static void normal_task_dispatching(struct hle_t* hle, bool* complete)
 {
+    *complete = true;
     const unsigned int sum =
         sum_bytes((void*)dram_u32(hle, *dmem_u32(hle, TASK_UCODE)), min(*dmem_u32(hle, TASK_UCODE_SIZE), 0xf80) >> 1);
 
@@ -298,7 +309,7 @@ static void normal_task_dispatching(struct hle_t* hle)
     /* GFX: Twintris [misleading task->type == 0] */
     case 0x212ee:
         if (FORWARD_GFX) {
-            forward_gfx_task(hle);
+            *complete = forward_gfx_task(hle);
             return;
         }
         break;

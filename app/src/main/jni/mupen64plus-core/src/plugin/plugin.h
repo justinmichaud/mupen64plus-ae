@@ -47,6 +47,7 @@ typedef struct _gfx_plugin_functions
 	ptr_InitiateGFX      initiateGFX;
 	ptr_MoveScreen       moveScreen;
 	ptr_ProcessDList     processDList;
+	ptr_ProcessDList2    processDList2;
 	ptr_ProcessRDPList   processRDPList;
 	ptr_RomClosed        romClosed;
 	ptr_RomOpen          romOpen;

@@ -6,6 +6,7 @@ ChangeWindow;
 InitiateGFX;
 MoveScreen;
 ProcessDList;
+ProcessDList2;
 ProcessRDPList;
 RomClosed;
 RomOpen;

@@ -12,6 +12,9 @@ typedef struct
 	bool bLLE;
 	char romname[21];
 	wchar_t pluginpath[PLUGIN_PATH_SIZE];
+	u32 complete;
+	bool inLoop;
+	u32 loopNextAddress;
 } RSPInfo;
 
 extern RSPInfo RSP;
@@ -22,7 +25,7 @@ extern u32 rectDepthBufferCopyFrame;
 #define RSP_SegmentToPhysical( segaddr ) ((gSP.segment[(segaddr >> 24) & 0x0F] + (segaddr & RDRAMSize)) & RDRAMSize)
 
 void RSP_Init();
-void RSP_ProcessDList();
+int RSP_ProcessDList();
 void RSP_LoadMatrix( f32 mtx[4][4], u32 address );
 void RSP_CheckDLCounter();
 

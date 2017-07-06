@@ -1,3 +1,4 @@
+#include <sstream>
 #include "GLideN64.h"
 #include "DebugDump.h"
 #include "F3D.h"
@@ -7,6 +8,7 @@
 #include "gSP.h"
 #include "gDP.h"
 #include "GBI.h"
+#include "Log.h"
 
 void F3D_SPNoOp( u32 w0, u32 w1 )
 {
@@ -84,6 +86,15 @@ void F3D_Reserved1( u32 w0, u32 w1 )
 
 void F3D_DList( u32 w0, u32 w1 )
 {
+	/*
+	u32 addr = RSP_SegmentToPhysical(w1) & 0x00FFFFFF;
+
+	if (addr == RSP.PC[RSP.PCi] - 8) {
+		RSP.halt = TRUE;
+		*REG.MI_INTR |= MI_INTR_DP;
+		CheckInterrupts();
+	}*/
+
 	switch (_SHIFTR( w0, 16, 8 ))
 	{
 		case G_DL_PUSH:

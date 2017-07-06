@@ -172,6 +172,7 @@ typedef void (*ptr_ChangeWindow)(void);
 typedef int  (*ptr_InitiateGFX)(GFX_INFO Gfx_Info);
 typedef void (*ptr_MoveScreen)(int x, int y);
 typedef void (*ptr_ProcessDList)(void);
+typedef int (*ptr_ProcessDList2)(void);
 typedef void (*ptr_ProcessRDPList)(void);
 typedef void (*ptr_ShowCFB)(void);
 typedef void (*ptr_UpdateScreen)(void);

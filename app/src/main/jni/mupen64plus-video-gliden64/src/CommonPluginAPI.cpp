@@ -23,6 +23,11 @@ EXPORT void CALL ProcessDList(void)
 	api().ProcessDList();
 }
 
+EXPORT int CALL ProcessDList2(void)
+{
+	return api().ProcessDList();
+}
+
 EXPORT void CALL ProcessRDPList(void)
 {
 	api().ProcessRDPList();

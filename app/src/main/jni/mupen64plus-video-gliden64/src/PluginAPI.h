@@ -31,7 +31,7 @@ public:
 	void ViStatusChanged() {}
 	void ViWidthChanged() {}
 
-	void ProcessDList();
+	int ProcessDList();
 	void ProcessRDPList();
 	void RomClosed();
 	void RomOpen();

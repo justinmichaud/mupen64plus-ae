@@ -189,6 +189,8 @@ static m64p_error plugin_connect_gfx(m64p_dynlib_handle plugin_handle)
             return M64ERR_INPUT_INVALID;
         }
 
+        GET_FUNC(ptr_ProcessDList2, gfx.processDList2, "ProcessDList2");
+
         /* set function pointers for optional functions */
         gfx.resizeVideoOutput = (ptr_ResizeVideoOutput) osal_dynlib_getproc(plugin_handle, "ResizeVideoOutput");
 
@@ -488,7 +490,8 @@ static m64p_error plugin_start_rsp(void)
     rsp_info.DPC_PIPEBUSY_REG = &g_dev.dp.dpc_regs[DPC_PIPEBUSY_REG];
     rsp_info.DPC_TMEM_REG = &g_dev.dp.dpc_regs[DPC_TMEM_REG];
     rsp_info.CheckInterrupts = EmptyFunc;
-    rsp_info.ProcessDlistList = gfx.processDList;
+	rsp_info.ProcessDlistList = gfx.processDList;
+	rsp_info.ProcessDlistList2 = gfx.processDList2;
     rsp_info.ProcessAlistList = audio.processAList;
     rsp_info.ProcessRdpList = gfx.processRDPList;
     rsp_info.ShowCFB = gfx.showCFB;

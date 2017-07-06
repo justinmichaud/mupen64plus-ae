@@ -17,6 +17,7 @@
 #include "Config.h"
 #include "TextureFilterHandler.h"
 #include "DisplayWindow.h"
+#include "Log.h"
 
 using namespace std;
 
@@ -34,12 +35,12 @@ void RSP_CheckDLCounter()
 	}
 }
 
-void RSP_ProcessDList()
+int RSP_ProcessDList()
 {
 	if (ConfigOpen || dwnd().isResizeWindow()) {
 		*REG.MI_INTR |= MI_INTR_DP;
 		CheckInterrupts();
-		return;
+		return TRUE;
 	}
 	if (*REG.VI_ORIGIN != VI.lastOrigin) {
 		VI_UpdateSize();
@@ -52,6 +53,7 @@ void RSP_ProcessDList()
 
 	RSP.halt = FALSE;
 	RSP.busy = TRUE;
+	RSP.complete = TRUE;
 
 	gSP.matrix.stackSize = min( 32U, *(u32*)&DMEM[0x0FE4] >> 6 );
 	if (gSP.matrix.stackSize == 0)
@@ -85,6 +87,7 @@ void RSP_ProcessDList()
 		RunT3DUX();
 		break;
 	default:
+
 		while (!RSP.halt) {
 			if ((RSP.PC[RSP.PCi] + 8) > RDRAMSize) {
 				DebugMsg(DEBUG_NORMAL | DEBUG_ERROR, "ATTEMPTING TO EXECUTE RSP COMMAND AT INVALID RDRAM LOCATION\n");
@@ -95,18 +98,32 @@ void RSP_ProcessDList()
 			RSP.w1 = *(u32*)&RDRAM[RSP.PC[RSP.PCi] + 4];
 			RSP.cmd = _SHIFTR(RSP.w0, 24, 8);
 
+			u32 addr0 = RSP_SegmentToPhysical(RSP.w0);
+			u32 addr1 = RSP_SegmentToPhysical(RSP.w1);
+
+			if(RSP.inLoop && addr0 == 0 && addr1 == 0 && RSP.PCi == 0)
+			{
+				//LOG(LOG_ERROR, "ADDRESS IS %08x while in loop", addr1);
+				//RSP.halt = true;
+				RSP.inLoop = false;
+				RSP.PC[RSP.PCi] = RSP.loopNextAddress;
+			}
+
+			//if(!RSP.inLoop)
+			{
 //			DebugRSPState( RSP.PCi, RSP.PC[RSP.PCi], _SHIFTR( RSP.w0, 24, 8 ), RSP.w0, RSP.w1 );
 //			DebugMsg( DEBUG_LOW | DEBUG_HANDLED, "0x%08lX: CMD=0x%02lX W0=0x%08lX W1=0x%08lX\n", RSP.PC[RSP.PCi], _SHIFTR( RSP.w0, 24, 8 ), RSP.w0, RSP.w1 );
-			DebugMsg(DEBUG_LOW, "%08x (w0:%08x, w1:%08x): ", RSP.PC[RSP.PCi], RSP.w0, RSP.w1);
+				DebugMsg(DEBUG_LOW, "%08x (w0:%08x, w1:%08x): ", RSP.PC[RSP.PCi], RSP.w0, RSP.w1);
 
-			RSP.PC[RSP.PCi] += 8;
-			u32 pci = RSP.PCi;
-			if (RSP.count == 1)
-				--pci;
-			RSP.nextCmd = _SHIFTR(*(u32*)&RDRAM[RSP.PC[pci]], 24, 8);
+				RSP.PC[RSP.PCi] += 8;
+				u32 pci = RSP.PCi;
+				if (RSP.count == 1)
+					--pci;
+				RSP.nextCmd = _SHIFTR(*(u32*)&RDRAM[RSP.PC[pci]], 24, 8);
 
-			GBI.cmd[RSP.cmd](RSP.w0, RSP.w1);
-			RSP_CheckDLCounter();
+				GBI.cmd[RSP.cmd](RSP.w0, RSP.w1);
+				RSP_CheckDLCounter();
+			}
 		}
 	}
 
@@ -122,6 +139,8 @@ void RSP_ProcessDList()
 
 	RSP.busy = FALSE;
 	gDP.changed |= CHANGED_COLORBUFFER;
+
+	return RSP.complete;
 }
 
 static
@@ -196,6 +215,7 @@ void RSP_Init()
 
 	RSP.uc_start = RSP.uc_dstart = 0;
 	RSP.bLLE = false;
+	RSP.inLoop = false;
 
 	// get the name of the ROM
 	char romname[21];

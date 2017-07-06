@@ -150,13 +150,13 @@ private:
 };
 #endif
 
-void PluginAPI::ProcessDList()
+int PluginAPI::ProcessDList()
 {
 	LOG(LOG_APIFUNC, "ProcessDList\n");
 #ifdef RSPTHREAD
 	_callAPICommand(ProcessDListCommand());
 #else
-	RSP_ProcessDList();
+	return RSP_ProcessDList();
 #endif
 }
 
