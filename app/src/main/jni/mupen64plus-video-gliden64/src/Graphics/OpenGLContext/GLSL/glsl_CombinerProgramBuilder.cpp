@@ -1831,7 +1831,7 @@ graphics::CombinerProgram * CombinerProgramBuilder::buildCombinerProgram(Combine
 	/* Write headers */
 	m_fragmentHeader->write(ssShader);
 
-	if (bUseTextures) {
+	if (bUseTextures || bUseLod) {
 		m_fragmentGlobalVariablesTex->write(ssShader);
 
 		if (g_cycleType == G_CYC_2CYCLE && config.generalEmulation.enableLegacyBlending == 0)
@@ -1843,10 +1843,12 @@ graphics::CombinerProgram * CombinerProgramBuilder::buildCombinerProgram(Combine
 		m_fragmentHeaderWriteDepth->write(ssShader);
 		m_fragmentHeaderDepthCompare->write(ssShader);
 		m_fragmentHeaderReadMSTex->write(ssShader);
+
 		if (bUseLod)
 			m_fragmentHeaderMipMap->write(ssShader);
-		else
+		else if (bUseTextures)
 			m_fragmentHeaderReadTex->write(ssShader);
+
 	} else {
 		m_fragmentGlobalVariablesNotex->write(ssShader);
 
