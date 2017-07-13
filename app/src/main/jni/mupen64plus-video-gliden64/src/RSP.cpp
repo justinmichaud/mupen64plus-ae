@@ -51,6 +51,24 @@ int RSP_ProcessDList()
 	RSP.PCi = 0;
 	RSP.count = -1;
 
+	if(RSP.inLoop)
+	{
+		u32 w0 = *(u32*)&RDRAM[RSP.loopAddress];
+		u32 w1 = *(u32*)&RDRAM[RSP.loopAddress + 4];
+
+		u32 addr0 = RSP_SegmentToPhysical(w0);
+		u32 addr1 = RSP_SegmentToPhysical(w1);
+
+		if(addr0 != 0 || addr1 != 0)
+		{
+			//LOG(LOG_ERROR, "%08x (w0:%08x, w1:%08x): ", RSP.loopAddress, w0, w1);
+
+			return FALSE;
+		} else {
+			RSP.inLoop = false;
+		}
+	}
+
 	RSP.halt = FALSE;
 	RSP.busy = TRUE;
 	RSP.complete = TRUE;
@@ -98,17 +116,6 @@ int RSP_ProcessDList()
 			RSP.w1 = *(u32*)&RDRAM[RSP.PC[RSP.PCi] + 4];
 			RSP.cmd = _SHIFTR(RSP.w0, 24, 8);
 
-			u32 addr0 = RSP_SegmentToPhysical(RSP.w0);
-			u32 addr1 = RSP_SegmentToPhysical(RSP.w1);
-
-			if(RSP.inLoop && addr0 == 0 && addr1 == 0 && RSP.PCi == 0)
-			{
-				//LOG(LOG_ERROR, "ADDRESS IS %08x while in loop", addr1);
-				//RSP.halt = true;
-				RSP.inLoop = false;
-				RSP.PC[RSP.PCi] = RSP.loopNextAddress;
-			}
-
 			//if(!RSP.inLoop)
 			{
 //			DebugRSPState( RSP.PCi, RSP.PC[RSP.PCi], _SHIFTR( RSP.w0, 24, 8 ), RSP.w0, RSP.w1 );
@@ -141,7 +148,7 @@ int RSP_ProcessDList()
 	RSP.busy = FALSE;
 	gDP.changed |= CHANGED_COLORBUFFER;
 
-	LOG(LOG_ERROR, "complete=%d", RSP.complete);
+//	LOG(LOG_ERROR, "complete=%d", RSP.complete);
 
 	return RSP.complete;
 }

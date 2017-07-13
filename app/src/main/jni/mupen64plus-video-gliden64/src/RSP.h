@@ -14,7 +14,7 @@ typedef struct
 	wchar_t pluginpath[PLUGIN_PATH_SIZE];
 	u32 complete;
 	bool inLoop;
-	u32 loopNextAddress;
+	u32 loopAddress;
 } RSPInfo;
 
 extern RSPInfo RSP;

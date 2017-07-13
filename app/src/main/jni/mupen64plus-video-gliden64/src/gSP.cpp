@@ -1381,17 +1381,12 @@ void gSPBranchList( u32 dl )
 	DebugMsg(DEBUG_NORMAL, "gSPBranchList( 0x%08X ) nopush\n", dl );
 
 	if (address + 8 == RSP.PC[RSP.PCi]) {
-		//RSP.PC[RSP.PCi] = address + 8;
 		gSPEndDisplayList();
 
 		RSP.complete = FALSE;
 		RSP.inLoop = true;
-		RSP.loopNextAddress = address + 8;
-	} /*else {
-		std::stringstream text;
-		text << "F3D_DList: Address 0x" << std::hex << dl << std::endl;
-		LOG(LOG_ERROR, text.str().c_str());
-	} */
+		RSP.loopAddress = address;
+	}
 
 	RSP.PC[RSP.PCi] = address;
 
