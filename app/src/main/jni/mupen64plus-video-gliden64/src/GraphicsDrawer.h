@@ -133,7 +133,7 @@ public:
 
 	bool isImageTexturesSupported() const { return m_bImageTexture; }
 
-	SPVertex & getVertex(u32 _v) { return triangles.vertices[_v]; }
+	SPVertex & getVertex(u32 _v) { return triangles.vertices[_v&0xff]; }
 
 	void setDMAVerticesSize(u32 _size) { if (m_dmaVertices.size() < _size) m_dmaVertices.resize(_size); }
 
