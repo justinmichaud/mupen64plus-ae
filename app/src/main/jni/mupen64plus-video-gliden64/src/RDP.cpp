@@ -10,9 +10,12 @@
 #include "Config.h"
 #include "DebugDump.h"
 #include "DisplayWindow.h"
+#include "Log.h"
 
 void RDP_Unknown( u32 w0, u32 w1 )
 {
+	LOG(LOG_ERROR,"Unknown RDP opcode %02X", _SHIFTR(w0, 24, 8));
+
 	DebugMsg(DEBUG_NORMAL, "RDP_Unknown\r\n");
 	DebugMsg(DEBUG_NORMAL, "\tUnknown RDP opcode %02X\r\n", _SHIFTR(w0, 24, 8));
 }
@@ -400,6 +403,15 @@ void RDP_Init()
 	GBI.cmd[G_RDPLOADSYNC]		= RDP_LoadSync;
 	GBI.cmd[G_TEXRECTFLIP]		= RDP_TexRectFlip;
 	GBI.cmd[G_TEXRECT]			= RDP_TexRect;
+
+	//Low Level RDP Drawing Commands:
+	GBI.cmd[G_TRI_FILL]             = RDP_TriFill;
+	GBI.cmd[G_TRI_FILL_ZBUFF]       = RDP_TriFillZ;
+	GBI.cmd[G_TRI_TXTR]             = RDP_TriTxtr;
+	GBI.cmd[G_TRI_TXTR_ZBUFF]       = RDP_TriTxtrZ;
+	GBI.cmd[G_TRI_SHADE]            = RDP_TriShade;
+	GBI.cmd[G_TRI_SHADE_TXTR]       = RDP_TriShadeTxtr;
+	GBI.cmd[G_TRI_SHADE_TXTR_ZBUFF] = RDP_TriShadeTxtrZ;
 
 	RDP.w2 = RDP.w3 = 0;
 	RDP.cmd_ptr = RDP.cmd_cur = 0;

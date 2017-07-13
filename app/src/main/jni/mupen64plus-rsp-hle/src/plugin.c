@@ -101,11 +101,6 @@ bool HleProcessDlistList(void* UNUSED(user_defined))
     if (l_ProcessDlistList2 != NULL)
     {
         returnValue = (*l_ProcessDlistList2)();
-
-		if(returnValue == 1)
-		{
-			HleErrorMessage(0, "RETURN VALUE2=%d", returnValue);
-		}
     }
 
     else if (l_ProcessDlistList != NULL)
