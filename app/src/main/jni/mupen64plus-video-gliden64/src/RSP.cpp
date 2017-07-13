@@ -120,13 +120,6 @@ int RSP_ProcessDList()
 				if (RSP.count == 1)
 					--pci;
 
-				if(pci > 18)
-				{
-					LOG(LOG_ERROR, "PCI=%d", pci);
-				} else if(RSP.PC[pci] > RDRAMSize) {
-					LOG(LOG_ERROR, "RSP.PC[pci]=%08x", RSP.PC[pci]);
-				}
-
 				RSP.nextCmd = _SHIFTR(*(u32*)&RDRAM[RSP.PC[pci]], 24, 8);
 
 				GBI.cmd[RSP.cmd](RSP.w0, RSP.w1);
@@ -147,6 +140,8 @@ int RSP_ProcessDList()
 
 	RSP.busy = FALSE;
 	gDP.changed |= CHANGED_COLORBUFFER;
+
+	LOG(LOG_ERROR, "complete=%d", RSP.complete);
 
 	return RSP.complete;
 }

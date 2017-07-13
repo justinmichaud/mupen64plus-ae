@@ -407,6 +407,7 @@ void RDP_Init()
 	//Low Level RDP Drawing Commands:
 	GBI.cmd[G_TRI_FILL]             = RDP_TriFill;
 	GBI.cmd[G_TRI_FILL_ZBUFF]       = RDP_TriFillZ;
+	GBI.cmd[G_TRI_SHADE_ZBUFF]      = RDP_TriShadeZ;
 	GBI.cmd[G_TRI_TXTR]             = RDP_TriTxtr;
 	GBI.cmd[G_TRI_TXTR_ZBUFF]       = RDP_TriTxtrZ;
 	GBI.cmd[G_TRI_SHADE]            = RDP_TriShade;
